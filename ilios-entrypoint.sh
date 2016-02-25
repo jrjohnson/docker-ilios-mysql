@@ -9,8 +9,10 @@ fi
 if [ "$1" = 'mysqld' ]; then
 
 	echo 'Retrieving Ilios Demo Database...'
-	/usr/bin/wget --quiet https://ilios-demo.ucsf.edu/latest_db/ilios3_demosite_db.sql.gz
+	/usr/bin/wget https://ilios-demo.ucsf.edu/latest_db/ilios3_demosite_db.sql.gz
+	echo 'done... unpacking demo database'
 	gunzip ilios3_demosite_db.sql.gz
+	echo 'done.... copying ilios demo database to by read automatically by docker'
 	echo "USE ilios;" > /docker-entrypoint-initdb.d/ilios.sql
 	cat ilios3_demosite_db.sql >> /docker-entrypoint-initdb.d/ilios.sql
 	rm ilios3_demosite_db.sql
