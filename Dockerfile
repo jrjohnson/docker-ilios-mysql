@@ -2,7 +2,7 @@ FROM mysql:5.5
 
 # customized to install ilios demo database
 MAINTAINER Jonathan Johnson <jon.johnson@ucsf.edu>
-ENV MYSQL_ROOT_PASSWORD=root
+ENV MYSQL_RANDOM_ROOT_PASSWORD yes
 ENV MYSQL_USER ilios
 ENV MYSQL_PASSWORD ilios
 ENV MYSQL_DATABASE ilios
