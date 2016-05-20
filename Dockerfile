@@ -1,4 +1,4 @@
-FROM mysql:5.5
+FROM mysql:5.7
 
 # customized to install ilios demo database
 MAINTAINER Jonathan Johnson <jon.johnson@ucsf.edu>
