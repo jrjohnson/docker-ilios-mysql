@@ -1,6 +1,18 @@
 #!/bin/bash
 set -eo pipefail
 
+if [ ! -f /docker-entrypoint-initdb.d/ilios.sql ]; then
+	echo 'Retrieving Ilios Demo Database...'
+	/usr/bin/wget --no-verbose -P /tmp https://ilios-demo.ucsf.edu/latest_db/ilios3_demosite_db.sql.gz
+	echo 'done... unpacking demo database'
+	gunzip /tmp/ilios3_demosite_db.sql.gz
+	echo 'done.... copying ilios demo database to by read automatically by docker'
+	echo "USE ilios;" > /docker-entrypoint-initdb.d/ilios.sql
+	cat /tmp/ilios3_demosite_db.sql > /docker-entrypoint-initdb.d/ilios.sql
+	rm /tmp/ilios3_demosite_db.sql
+	echo 'done'
+fi
+
 # if command starts with an option, prepend mysqld
 if [ "${1:0:1}" = '-' ]; then
 	set -- mysqld "$@"
@@ -17,20 +29,8 @@ for arg; do
 	esac
 done
 
-if [ ! -f /docker-entrypoint-initdb.d/ilios.sql ]; then
-	echo 'Retrieving Ilios Demo Database...'
-	/usr/bin/wget --no-verbose https://ilios-demo.ucsf.edu/latest_db/ilios3_demosite_db.sql.gz
-	echo 'done... unpacking demo database'
-	gunzip ilios3_demosite_db.sql.gz
-	echo 'done.... copying ilios demo database to by read automatically by docker'
-	echo "USE ilios;" > /docker-entrypoint-initdb.d/ilios.sql
-	cat ilios3_demosite_db.sql > /docker-entrypoint-initdb.d/ilios.sql
-	rm ilios3_demosite_db.sql
-	echo 'done'
-fi
-
 _datadir() {
-	"$@" --verbose --help 2>/dev/null | awk '$1 == "datadir" { print $2; exit }'
+	"$@" --verbose --help --log-bin-index=`mktemp -u` 2>/dev/null | awk '$1 == "datadir" { print $2; exit }'
 }
 
 # allow the container to be started with `--user`
@@ -55,7 +55,7 @@ if [ "$1" = 'mysqld' -a -z "$wantHelp" ]; then
 		mkdir -p "$DATADIR"
 
 		echo 'Initializing database'
-		"$@" --initialize-insecure
+		mysql_install_db --datadir="$DATADIR" --rpm --keep-my-cnf
 		echo 'Database initialized'
 
 		"$@" --skip-networking &
