@@ -1,2 +1,2 @@
 # docker-ilios-mysql
-A docker image with the demo ilios DB in it
+Docker mysql configured for ilios.
